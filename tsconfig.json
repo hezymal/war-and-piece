@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "module": "amd",
+        "outDir": "dist",
+        "sourceMap": true,
+        "target": "es6"
+    },
+    "include": [
+        "src/**.ts", 
+        "src/defs/shaders.d.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
