@@ -2,16 +2,19 @@
   "name": "war-and-piece",
   "version": "0.0.0",
   "scripts": {
-    "build": "npx webpack"
+    "build": "npx webpack",
+    "start": "npx webpack-dev-server --open"
   },
   "author": "hezymal@gmail.com",
   "license": "ISC",
   "devDependencies": {
     "awesome-typescript-loader": "^5.2.1",
+    "file-loader": "^4.0.0",
     "html-webpack-plugin": "^3.2.0",
     "typescript": "^3.2.2",
     "webpack": "^4.27.1",
-    "webpack-cli": "^3.1.2",
+    "webpack-cli": "^3.3.2",
+    "webpack-dev-server": "^3.7.1",
     "webpack-glsl-loader": "^1.0.1"
   }
 }

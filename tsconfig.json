@@ -3,11 +3,12 @@
         "module": "amd",
         "outDir": "dist",
         "sourceMap": true,
-        "target": "es6"
+        "target": "es6",
+        "noImplicitAny": true
     },
     "include": [
-        "src/**.ts", 
-        "src/defs/shaders.d.ts"
+        "src/**.ts",
+        "src/defs/**.d.ts"
     ],
     "exclude": [
         "node_modules"
