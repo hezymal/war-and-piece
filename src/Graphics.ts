@@ -1,4 +1,5 @@
 import Object3D from "./Object3D";
+import AssetInfo from "./assets/AssetInfo";
 
 class Graphics {
     private webgl: WebGLRenderingContext;
@@ -17,47 +18,52 @@ class Graphics {
         this.loadTexture = this.loadTexture.bind(this);
     }
 
-    createObject3D(vertices: number[], indices: number[], texcoords: number[], vertexShaderSource: string, fragmentShaderSource: string) {
+    createObject3D(assetInfo: AssetInfo) {
         const object3D = new Object3D();
         
-        object3D.program = this.createProgramFromSources(vertexShaderSource, fragmentShaderSource);
+        object3D.program = this.createProgramFromSources(
+            assetInfo.vertexShaderSource, 
+            assetInfo.fragmentShaderSource
+        );
         
         object3D.positionAttribLocation = this.webgl.getAttribLocation(object3D.program, "a_position");
         object3D.matrixUniformLocation = this.webgl.getUniformLocation(object3D.program, "u_matrix");
         object3D.resolutionUniformLocation = this.webgl.getUniformLocation(object3D.program, "u_resolution");
         object3D.positionBuffer = this.webgl.createBuffer();
         this.webgl.bindBuffer(this.webgl.ARRAY_BUFFER, object3D.positionBuffer);
-        this.webgl.bufferData(this.webgl.ARRAY_BUFFER, new Float32Array(vertices), this.webgl.STATIC_DRAW);
+        this.webgl.bufferData(this.webgl.ARRAY_BUFFER, new Float32Array(assetInfo.vertices), this.webgl.STATIC_DRAW);
         
-        object3D.indecesCount = indices.length;
+        object3D.indecesCount = assetInfo.indices.length;
         object3D.indexBuffer = this.webgl.createBuffer();
         this.webgl.bindBuffer(this.webgl.ELEMENT_ARRAY_BUFFER, object3D.indexBuffer);
-        this.webgl.bufferData(this.webgl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), this.webgl.STATIC_DRAW);
+        this.webgl.bufferData(this.webgl.ELEMENT_ARRAY_BUFFER, new Uint16Array(assetInfo.indices), this.webgl.STATIC_DRAW);
         
         object3D.texcoordAttribLocation = this.webgl.getAttribLocation(object3D.program, "a_texcoords");
         object3D.texcoordsBuffer = this.webgl.createBuffer();
         this.webgl.bindBuffer(this.webgl.ARRAY_BUFFER, object3D.texcoordsBuffer);
-        this.webgl.bufferData(this.webgl.ARRAY_BUFFER, new Float32Array(texcoords), this.webgl.STATIC_DRAW);
+        this.webgl.bufferData(this.webgl.ARRAY_BUFFER, new Float32Array(assetInfo.texcoords), this.webgl.STATIC_DRAW);
         
         object3D.textureUniformLocation = this.webgl.getUniformLocation(object3D.program, 'u_texture');
         object3D.texture = this.webgl.createTexture();
         this.webgl.bindTexture(this.webgl.TEXTURE_2D, object3D.texture);
         this.webgl.texImage2D(this.webgl.TEXTURE_2D, 0, this.webgl.RGBA, 1, 1, 0, this.webgl.RGBA, this.webgl.UNSIGNED_BYTE, new Uint8Array([200, 200, 200, 255]));
+        
+        this.loadTexture(object3D.texture, assetInfo.textureSource);
 
         return object3D;
     }
 
-    loadTexture(object3D: Object3D, imageSrc: string) {
+    loadTexture(texture: WebGLTexture, imageSource: string) {
         var image = new Image();
         image.addEventListener("load", () => {
-            this.webgl.bindTexture(this.webgl.TEXTURE_2D, object3D.texture);
+            this.webgl.bindTexture(this.webgl.TEXTURE_2D, texture);
             this.webgl.texImage2D(this.webgl.TEXTURE_2D, 0, this.webgl.RGBA, this.webgl.RGBA, this.webgl.UNSIGNED_BYTE, image);
             this.webgl.texParameteri(this.webgl.TEXTURE_2D, this.webgl.TEXTURE_MAG_FILTER, this.webgl.LINEAR);
             this.webgl.texParameteri(this.webgl.TEXTURE_2D, this.webgl.TEXTURE_MIN_FILTER, this.webgl.LINEAR_MIPMAP_NEAREST);
             this.webgl.generateMipmap(this.webgl.TEXTURE_2D);
             this.webgl.bindTexture(this.webgl.TEXTURE_2D, null);
         });
-        image.src = imageSrc;
+        image.src = imageSource;
     }
 
     render(objects: Object3D[]) {

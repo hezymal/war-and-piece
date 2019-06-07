@@ -1,14 +1,13 @@
 {
     "compilerOptions": {
-        "module": "amd",
         "outDir": "dist",
         "sourceMap": true,
         "target": "es6",
-        "noImplicitAny": true
+        "noImplicitAny": true,
+        "moduleResolution": "node"
     },
     "include": [
-        "src/**.ts",
-        "src/defs/**.d.ts"
+        "src/**/*"
     ],
     "exclude": [
         "node_modules"
