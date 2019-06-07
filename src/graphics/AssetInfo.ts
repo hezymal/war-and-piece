@@ -1,4 +1,5 @@
 interface AssetInfo {
+    key: string;
     vertices: number[];
     indices: number[];
     texcoords: number[];
