@@ -68,8 +68,8 @@ export function multiply(a: Matrix3, b: Matrix3): Matrix3 {
     ];
 }
 
-export function multiplyMany(...args: Matrix3[]): Matrix3 {
-    return args.reduce((acc, m3) => acc ? multiply(acc, m3) : m3);
+export function multiplyMany(...args: Matrix3[]) {
+    return args.reduce((acc, matrix) => acc ? multiply(acc, matrix) : matrix);
 }
 
 export default Matrix3;

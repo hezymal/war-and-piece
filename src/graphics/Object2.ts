@@ -2,7 +2,7 @@ import Vector2 from "../math/Vector2";
 import Matrix3, * as matrix3 from "../math/Matrix3";
 import { degreesToRadians } from "../math/angle";
 
-class Object2D {
+class Object2 {
     public assetKey: string;
     public origin: Vector2 = [0, 0];
     public translation: Vector2 = [0, 0];
@@ -25,4 +25,4 @@ class Object2D {
     }
 }
 
-export default Object2D;
+export default Object2;

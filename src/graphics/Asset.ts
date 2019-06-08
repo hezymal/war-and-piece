@@ -1,16 +1,23 @@
 interface Asset {
     key: string;
     program: WebGLProgram;
+    
     resolutionUniformLocation: WebGLUniformLocation;
     matrixUniformLocation: WebGLUniformLocation;
-    textureUniformLocation: WebGLUniformLocation;
     positionAttribLocation: number;
-    texcoordAttribLocation: number;
     positionBuffer: WebGLBuffer;
     indexBuffer: WebGLBuffer;
-    texcoordsBuffer: WebGLBuffer;
-    texture: WebGLTexture;
     indecesCount: number;
+
+    isTextured: boolean;
+    textureUniformLocation?: WebGLUniformLocation;
+    texcoordAttribLocation?: number;
+    texcoordsBuffer?: WebGLBuffer;
+    texture?: WebGLTexture;
+
+    isColored: boolean;
+    colorBuffer?: WebGLBuffer;
+    colorAttribLocation?: number;
 }
 
 export default Asset;

@@ -1,7 +1,8 @@
-import Object2D from "./Object2D";
+import Object2 from "./Object2";
 import AssetInfo from "./AssetInfo";
 import AssetManager from "./AssetManager";
 import Asset from "./Asset";
+import Object3 from "./Object3";
 
 class Graphics {
     private webgl: WebGLRenderingContext;
@@ -17,7 +18,7 @@ class Graphics {
         this.createProgram = this.createProgram.bind(this);
         this.createProgramFromSources = this.createProgramFromSources.bind(this);
         this.beginRender = this.beginRender.bind(this);
-        this.renderObject2D = this.renderObject2D.bind(this);
+        this.renderObject2 = this.renderObject2.bind(this);
         this.loadAsset = this.loadAsset.bind(this);
         this.loadTexture = this.loadTexture.bind(this);
     }
@@ -40,18 +41,7 @@ class Graphics {
         this.webgl.bindBuffer(this.webgl.ELEMENT_ARRAY_BUFFER, indexBuffer);
         this.webgl.bufferData(this.webgl.ELEMENT_ARRAY_BUFFER, new Uint16Array(assetInfo.indices), this.webgl.STATIC_DRAW);
         
-        const texcoordAttribLocation = this.webgl.getAttribLocation(program, "a_texcoords");
-        const texcoordsBuffer = this.webgl.createBuffer();
-        this.webgl.bindBuffer(this.webgl.ARRAY_BUFFER, texcoordsBuffer);
-        this.webgl.bufferData(this.webgl.ARRAY_BUFFER, new Float32Array(assetInfo.texcoords), this.webgl.STATIC_DRAW);
-        
-        const textureUniformLocation = this.webgl.getUniformLocation(program, 'u_texture');
-        const texture = this.webgl.createTexture();
-        this.webgl.bindTexture(this.webgl.TEXTURE_2D, texture);
-        this.webgl.texImage2D(this.webgl.TEXTURE_2D, 0, this.webgl.RGBA, 1, 1, 0, this.webgl.RGBA, this.webgl.UNSIGNED_BYTE, new Uint8Array([200, 200, 200, 255]));
-        this.loadTexture(texture, assetInfo.textureSource);
-
-        this.assetManager.set({
+        const asset: Asset = {
             key: assetInfo.key,
             program,
             positionAttribLocation,
@@ -60,37 +50,105 @@ class Graphics {
             positionBuffer,
             indecesCount,
             indexBuffer,
-            texcoordAttribLocation,
-            texcoordsBuffer,
-            textureUniformLocation,
-            texture,
-        });
+            isTextured: assetInfo.isTextured,
+            isColored: assetInfo.isColored,
+        };
+
+        if (assetInfo.isTextured) {
+            const texcoordAttribLocation = this.webgl.getAttribLocation(program, "a_texcoords");
+            const texcoordsBuffer = this.webgl.createBuffer();
+            this.webgl.bindBuffer(this.webgl.ARRAY_BUFFER, texcoordsBuffer);
+            this.webgl.bufferData(this.webgl.ARRAY_BUFFER, new Float32Array(assetInfo.texcoords), this.webgl.STATIC_DRAW);
+            
+            const textureUniformLocation = this.webgl.getUniformLocation(program, "u_texture");
+            const texture = this.webgl.createTexture();
+            this.webgl.bindTexture(this.webgl.TEXTURE_2D, texture);
+            this.webgl.texImage2D(this.webgl.TEXTURE_2D, 0, this.webgl.RGBA, 1, 1, 0, this.webgl.RGBA, this.webgl.UNSIGNED_BYTE, new Uint8Array([200, 200, 200, 255]));
+            this.loadTexture(texture, assetInfo.textureSource);
+
+            asset.texcoordAttribLocation = texcoordAttribLocation;
+            asset.textureUniformLocation = textureUniformLocation;
+            asset.texcoordsBuffer = texcoordsBuffer;
+            asset.texture = texture;
+        }
+
+        if (assetInfo.isColored) {
+            const colorAttribLocation = this.webgl.getAttribLocation(program, "a_color");
+            const colorBuffer = this.webgl.createBuffer();
+            this.webgl.bindBuffer(this.webgl.ARRAY_BUFFER, colorBuffer);
+            this.webgl.bufferData(this.webgl.ARRAY_BUFFER, new Uint8Array(assetInfo.colors), this.webgl.STATIC_DRAW);
+
+            asset.colorAttribLocation = colorAttribLocation;
+            asset.colorBuffer = colorBuffer;
+        }
+
+        this.assetManager.set(asset);
     }
 
     beginRender() {
         this.webgl.viewport(0, 0, this.webgl.canvas.width, this.webgl.canvas.height);
         this.webgl.clearColor(0.5, 0.5, 0.5, 1);
-        this.webgl.clear(this.webgl.COLOR_BUFFER_BIT);
+        this.webgl.clear(this.webgl.COLOR_BUFFER_BIT | this.webgl.DEPTH_BUFFER_BIT);
+        this.webgl.enable(this.webgl.CULL_FACE);
+        this.webgl.enable(this.webgl.DEPTH_TEST);
     }
 
-    renderObject2D(object2D: Object2D) {
-        const asset = this.assetManager.get(object2D.assetKey);
+    renderObject2(object2: Object2) {
+        const asset = this.assetManager.get(object2.assetKey);
 
+        this.webgl.useProgram(asset.program);
+        this.webgl.uniform2f(asset.resolutionUniformLocation, this.webgl.canvas.width, this.webgl.canvas.height);
+        this.webgl.uniformMatrix3fv(asset.matrixUniformLocation, false, object2.getMatrix());
+
+        this.webgl.bindBuffer(this.webgl.ARRAY_BUFFER, asset.positionBuffer);
+        this.webgl.vertexAttribPointer(asset.positionAttribLocation, 2, this.webgl.FLOAT, false, 0, 0)
+        this.webgl.enableVertexAttribArray(asset.positionAttribLocation);
+
+        if (asset.isTextured) {
+            this.webgl.bindBuffer(this.webgl.ARRAY_BUFFER, asset.texcoordsBuffer);
+            this.webgl.vertexAttribPointer(asset.texcoordAttribLocation, 2, this.webgl.FLOAT, false, 0, 0);
+            this.webgl.enableVertexAttribArray(asset.texcoordAttribLocation);
+            
+            this.webgl.activeTexture(this.webgl.TEXTURE0);
+            this.webgl.bindTexture(this.webgl.TEXTURE_2D, asset.texture);
+            this.webgl.uniform1i(asset.textureUniformLocation, 0);
+        }
+
+        if (asset.isColored) {
+            this.webgl.bindBuffer(this.webgl.ARRAY_BUFFER, asset.colorBuffer);
+            this.webgl.vertexAttribPointer(asset.colorAttribLocation, 4, this.webgl.UNSIGNED_BYTE, true, 0, 0);
+            this.webgl.enableVertexAttribArray(asset.colorAttribLocation);
+        }
+
+        this.webgl.bindBuffer(this.webgl.ELEMENT_ARRAY_BUFFER, asset.indexBuffer);
+        this.webgl.drawElements(this.webgl.TRIANGLES, asset.indecesCount, this.webgl.UNSIGNED_SHORT, 0);
+    }
+
+    renderObject3(object3: Object3) {
+        const asset = this.assetManager.get(object3.assetKey);
+        
         this.webgl.useProgram(asset.program);
         
         this.webgl.enableVertexAttribArray(asset.positionAttribLocation);
         this.webgl.bindBuffer(this.webgl.ARRAY_BUFFER, asset.positionBuffer);
-        this.webgl.vertexAttribPointer(asset.positionAttribLocation, 2, this.webgl.FLOAT, false, 0, 0)
-        this.webgl.uniform2f(asset.resolutionUniformLocation, this.webgl.canvas.width, this.webgl.canvas.height);
-        this.webgl.uniformMatrix3fv(asset.matrixUniformLocation, false, object2D.getMatrix());
+        this.webgl.vertexAttribPointer(asset.positionAttribLocation, 3, this.webgl.FLOAT, false, 0, 0)
+        this.webgl.uniformMatrix4fv(asset.matrixUniformLocation, false, object3.getMatrix());
 
-        this.webgl.enableVertexAttribArray(asset.texcoordAttribLocation);
-        this.webgl.bindBuffer(this.webgl.ARRAY_BUFFER, asset.texcoordsBuffer);
-        this.webgl.vertexAttribPointer(asset.texcoordAttribLocation, 2, this.webgl.FLOAT, false, 0, 0);
-        
-        this.webgl.activeTexture(this.webgl.TEXTURE0);
-        this.webgl.bindTexture(this.webgl.TEXTURE_2D, asset.texture);
-        this.webgl.uniform1i(asset.textureUniformLocation, 0);
+        if (asset.isTextured) {
+            this.webgl.enableVertexAttribArray(asset.texcoordAttribLocation);
+            this.webgl.bindBuffer(this.webgl.ARRAY_BUFFER, asset.texcoordsBuffer);
+            this.webgl.vertexAttribPointer(asset.texcoordAttribLocation, 2, this.webgl.FLOAT, false, 0, 0);
+            
+            this.webgl.activeTexture(this.webgl.TEXTURE0);
+            this.webgl.bindTexture(this.webgl.TEXTURE_2D, asset.texture);
+            this.webgl.uniform1i(asset.textureUniformLocation, 0);
+        }
+
+        if (asset.isColored) {
+            this.webgl.enableVertexAttribArray(asset.colorAttribLocation);
+            this.webgl.bindBuffer(this.webgl.ARRAY_BUFFER, asset.colorBuffer);
+            this.webgl.vertexAttribPointer(asset.colorAttribLocation, 4, this.webgl.UNSIGNED_BYTE, true, 0, 0);
+        }
 
         this.webgl.bindBuffer(this.webgl.ELEMENT_ARRAY_BUFFER, asset.indexBuffer);
         this.webgl.drawElements(this.webgl.TRIANGLES, asset.indecesCount, this.webgl.UNSIGNED_SHORT, 0);

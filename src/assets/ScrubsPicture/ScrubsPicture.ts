@@ -5,6 +5,7 @@ import AssetInfo from "../../graphics/AssetInfo";
 
 const assetInfo: AssetInfo = {
     key: "ScrubsPicture",
+    is3D: false,
     vertices: [
         0, 0,
         100, 0,
@@ -15,15 +16,19 @@ const assetInfo: AssetInfo = {
         0, 1, 2, 
         2, 3, 0
     ],
+    vertexShaderSource,
+    fragmentShaderSource,
+
+    isTextured: true,
     texcoords: [
         0, 0, 
         1, 0,
         1, 1,
         0, 1,
     ],
-    vertexShaderSource,
-    fragmentShaderSource,
     textureSource,
+
+    isColored: false,
 };
 
 export default assetInfo;
