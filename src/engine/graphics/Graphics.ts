@@ -1,8 +1,10 @@
 import Object2 from "./Object2";
+import Object3 from "./Object3";
 import AssetInfo from "./AssetInfo";
 import AssetManager from "./AssetManager";
 import Asset from "./Asset";
-import Object3 from "./Object3";
+import * as matrix4 from "engine/math/Matrix4";
+import Vector2 from "engine/math/Vector2";
 
 class Graphics {
     private webgl: WebGLRenderingContext;
@@ -21,6 +23,7 @@ class Graphics {
         this.renderObject2 = this.renderObject2.bind(this);
         this.loadAsset = this.loadAsset.bind(this);
         this.loadTexture = this.loadTexture.bind(this);
+        this.getViewport = this.getViewport.bind(this);
     }
 
     loadAsset(assetInfo: AssetInfo) {
@@ -86,18 +89,21 @@ class Graphics {
     }
 
     beginRender() {
-        this.webgl.viewport(0, 0, this.webgl.canvas.width, this.webgl.canvas.height);
+        const viewport = this.getViewport();
+
+        this.webgl.viewport(0, 0, viewport[0], viewport[1]);
         this.webgl.clearColor(0.5, 0.5, 0.5, 1);
         this.webgl.clear(this.webgl.COLOR_BUFFER_BIT | this.webgl.DEPTH_BUFFER_BIT);
-        this.webgl.enable(this.webgl.CULL_FACE);
-        this.webgl.enable(this.webgl.DEPTH_TEST);
     }
 
     renderObject2(object2: Object2) {
         const asset = this.assetManager.get(object2.assetKey);
+        const viewport = this.getViewport();
 
+        this.webgl.disable(this.webgl.CULL_FACE);
+        this.webgl.disable(this.webgl.DEPTH_TEST);
         this.webgl.useProgram(asset.program);
-        this.webgl.uniform2f(asset.resolutionUniformLocation, this.webgl.canvas.width, this.webgl.canvas.height);
+        this.webgl.uniform2f(asset.resolutionUniformLocation, viewport[0], viewport[1]);
         this.webgl.uniformMatrix3fv(asset.matrixUniformLocation, false, object2.getMatrix());
 
         this.webgl.bindBuffer(this.webgl.ARRAY_BUFFER, asset.positionBuffer);
@@ -126,13 +132,17 @@ class Graphics {
 
     renderObject3(object3: Object3) {
         const asset = this.assetManager.get(object3.assetKey);
+        const viewport = this.getViewport();
+        const identity = matrix4.projection(viewport[0], viewport[1], 4000);
         
+        this.webgl.enable(this.webgl.CULL_FACE);
+        this.webgl.enable(this.webgl.DEPTH_TEST);
         this.webgl.useProgram(asset.program);
         
         this.webgl.enableVertexAttribArray(asset.positionAttribLocation);
         this.webgl.bindBuffer(this.webgl.ARRAY_BUFFER, asset.positionBuffer);
         this.webgl.vertexAttribPointer(asset.positionAttribLocation, 3, this.webgl.FLOAT, false, 0, 0)
-        this.webgl.uniformMatrix4fv(asset.matrixUniformLocation, false, object3.getMatrix());
+        this.webgl.uniformMatrix4fv(asset.matrixUniformLocation, false, object3.getMatrix(identity));
 
         if (asset.isTextured) {
             this.webgl.enableVertexAttribArray(asset.texcoordAttribLocation);
@@ -152,6 +162,13 @@ class Graphics {
 
         this.webgl.bindBuffer(this.webgl.ELEMENT_ARRAY_BUFFER, asset.indexBuffer);
         this.webgl.drawElements(this.webgl.TRIANGLES, asset.indecesCount, this.webgl.UNSIGNED_SHORT, 0);
+    }
+
+    getViewport(): Vector2 {
+        return [
+            this.webgl.canvas.clientWidth, 
+            this.webgl.canvas.clientHeight
+        ];
     }
 
     private createShader(type: number, source: string) {

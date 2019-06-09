@@ -11,6 +11,19 @@ export function projection(width: number, height: number, depth: number) {
     ];
 }
 
+export function orthographic(left: number, right: number, bottom: number, top: number, near: number, far: number) {
+    return [
+        2 / (right - left), 0, 0, 0,
+        0, 2 / (top - bottom), 0, 0,
+        0, 0, 2 / (near - far), 0,
+
+        (left + right) / (left - right),
+        (bottom + top) / (bottom - top),
+        (near + far) / (near - far),
+        1,
+    ];
+}
+
 export function multiply(a: Matrix4, b: Matrix4) {
     var a00 = a[0 * 4 + 0];
     var a01 = a[0 * 4 + 1];
@@ -116,6 +129,15 @@ export function scaling(scale: Vector3) {
         0, scale[1],  0,  0,
         0,  0, scale[2],  0,
         0,  0,  0,  1,
+    ];
+}
+
+export function identity(): Matrix4 {
+    return [
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1,
     ];
 }
 

@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const path = require("path");
 
 module.exports = {
     mode: "development",
@@ -13,6 +14,10 @@ module.exports = {
     },
     resolve: {
         extensions: [".ts", ".js", ".json"],
+        alias: {
+            app: path.resolve(__dirname, "src/app/"),
+            engine: path.resolve(__dirname, "src/engine/")
+        }
     },
     module: {
         rules: [

@@ -1,7 +1,7 @@
 import * as vertexShaderSource from "./vertexShader.glsl";
 import * as fragmentShaderSource from "./fragmentShader.glsl";
 import * as textureSource from "./texture.jpg";
-import AssetInfo from "../../graphics/AssetInfo";
+import AssetInfo from "../../../engine/graphics/AssetInfo";
 
 const assetInfo: AssetInfo = {
     key: "ScrubsPicture",
