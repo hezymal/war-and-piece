@@ -24,6 +24,18 @@ export function orthographic(left: number, right: number, bottom: number, top: n
     ];
 }
 
+export function perspective(fieldOfViewInRadians: number, aspect: number, near: number, far: number): Matrix4 {
+    var f = Math.tan(Math.PI * 0.5 - 0.5 * fieldOfViewInRadians);
+    var rangeInv = 1.0 / (near - far);
+ 
+    return [
+        f / aspect, 0, 0, 0,
+        0, f, 0, 0,
+        0, 0, (near + far) * rangeInv, -1,
+        0, 0, near * far * rangeInv * 2, 0
+    ];
+}
+
 export function multiply(a: Matrix4, b: Matrix4) {
     var a00 = a[0 * 4 + 0];
     var a01 = a[0 * 4 + 1];

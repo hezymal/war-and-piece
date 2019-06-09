@@ -27,10 +27,9 @@ class Game extends Engine {
         this.first.scale = [1, 1];
 
         this.second = new Object3(Cube.key);
-        this.second.translation = [10, 10, 0];
-        this.second.rotation[0] = degreesToRadians(-10);
-        this.second.rotation[1] = degreesToRadians(10);
-        this.second.scale = [5, 5, 5];
+        this.second.translation = [0, 0, -400];
+        this.second.rotation = [degreesToRadians(10), degreesToRadians(10), 0];
+        this.second.scale = [1, 1, 1];
 
         super.run();
     }
@@ -38,7 +37,7 @@ class Game extends Engine {
     render() {
         super.render();
         this.graphics.renderObject3(this.second);
-        this.graphics.renderObject2(this.first);
+        //this.graphics.renderObject2(this.first);
     }
 }
 

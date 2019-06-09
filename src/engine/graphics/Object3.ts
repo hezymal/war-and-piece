@@ -4,7 +4,7 @@ import { degreesToRadians } from "../math/angle";
 
 class Object3 {
     public assetKey: string;
-    public origin: Vector3 = [0, 0, 0]; // TODO: add origin
+    public origin: Vector3 = [0, 0, 0];
     public translation: Vector3 = [0, 0, 0];
     public rotation: Vector3 = [
         degreesToRadians(0), 

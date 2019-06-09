@@ -3,8 +3,9 @@ import Object3 from "./Object3";
 import AssetInfo from "./AssetInfo";
 import AssetManager from "./AssetManager";
 import Asset from "./Asset";
-import * as matrix4 from "engine/math/Matrix4";
+import Matrix4, * as matrix4 from "engine/math/Matrix4";
 import Vector2 from "engine/math/Vector2";
+import { degreesToRadians } from "engine/math/angle";
 
 class Graphics {
     private webgl: WebGLRenderingContext;
@@ -24,6 +25,7 @@ class Graphics {
         this.loadAsset = this.loadAsset.bind(this);
         this.loadTexture = this.loadTexture.bind(this);
         this.getViewport = this.getViewport.bind(this);
+        this.getPerspectiveMatrix = this.getPerspectiveMatrix.bind(this);
     }
 
     loadAsset(assetInfo: AssetInfo) {
@@ -132,8 +134,7 @@ class Graphics {
 
     renderObject3(object3: Object3) {
         const asset = this.assetManager.get(object3.assetKey);
-        const viewport = this.getViewport();
-        const identity = matrix4.projection(viewport[0], viewport[1], 4000);
+        const identityMatrix = this.getPerspectiveMatrix(degreesToRadians(60), 1, 2000);
         
         this.webgl.enable(this.webgl.CULL_FACE);
         this.webgl.enable(this.webgl.DEPTH_TEST);
@@ -142,7 +143,7 @@ class Graphics {
         this.webgl.enableVertexAttribArray(asset.positionAttribLocation);
         this.webgl.bindBuffer(this.webgl.ARRAY_BUFFER, asset.positionBuffer);
         this.webgl.vertexAttribPointer(asset.positionAttribLocation, 3, this.webgl.FLOAT, false, 0, 0)
-        this.webgl.uniformMatrix4fv(asset.matrixUniformLocation, false, object3.getMatrix(identity));
+        this.webgl.uniformMatrix4fv(asset.matrixUniformLocation, false, object3.getMatrix(identityMatrix));
 
         if (asset.isTextured) {
             this.webgl.enableVertexAttribArray(asset.texcoordAttribLocation);
@@ -229,6 +230,12 @@ class Graphics {
             this.webgl.bindTexture(this.webgl.TEXTURE_2D, null);
         });
         image.src = imageSource;
+    }
+
+    private getPerspectiveMatrix(fieldOfViewRadians: number, zNear: number, zFar: number) {
+        const viewport = this.getViewport();
+        const aspect = viewport[0] / viewport[1];
+        return matrix4.perspective(fieldOfViewRadians, aspect, zNear, zFar);
     }
 }
 
