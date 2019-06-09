@@ -14,6 +14,8 @@ class Engine {
     }
 
     public run() {
+        this.graphics.initialize();
+        
         requestAnimationFrame(this.tick);
     }
 

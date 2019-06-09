@@ -18,8 +18,8 @@ class Game extends Engine {
     }
 
     run() {
-        this.graphics.loadAsset(Cube);
-        this.graphics.loadAsset(ScrubsPicture);
+        this.graphics.loadObjectAsset(Cube);
+        this.graphics.loadRelatedAsset(ScrubsPicture);
 
         this.first = new Object2(ScrubsPicture.key);
         this.first.origin = [0, 0];
@@ -37,7 +37,7 @@ class Game extends Engine {
     render() {
         super.render();
         this.graphics.renderObject3(this.second);
-        //this.graphics.renderObject2(this.first);
+        this.graphics.renderObject2(this.first);
     }
 }
 

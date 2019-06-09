@@ -30,7 +30,7 @@ module.exports = {
                 loader: "webpack-glsl-loader"
             },
             {
-                test: /\.(jpg)$/,
+                test: /\.(png|jpg)$/,
                 loader: "file-loader"
             },
         ],
