@@ -11,9 +11,9 @@ const asset: ObjectAsset = {
     vertex: {
         vertices: [
             0, 0,
-            100, 0,
-            100, 100,
-            0, 100,
+            1, 0,
+            1, 1,
+            0, 1,
         ],
         indices: [
             0, 1, 2, 

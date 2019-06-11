@@ -19,9 +19,8 @@ class Object3 {
         this.getMatrix = this.getMatrix.bind(this);
     }
 
-    public getMatrix(identity: Matrix4): Matrix4 {
+    public getMatrix(): Matrix4 {
         return matrix4.multiplyMany(
-            identity,
             matrix4.translation(this.translation), 
             matrix4.xRotation(this.rotation[0]),
             matrix4.yRotation(this.rotation[1]),

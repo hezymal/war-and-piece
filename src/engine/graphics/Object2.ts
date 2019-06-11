@@ -6,7 +6,7 @@ class Object2 {
     public assetKey: string;
     public origin: Vector2 = [0, 0];
     public translation: Vector2 = [0, 0];
-    public angleInDegrees: number = 0;
+    public angle: number = 0;
     public scale: Vector2 = [1, 1];
 
     constructor(assetKey: string) {
@@ -18,7 +18,7 @@ class Object2 {
     public getMatrix(): Matrix3 {
         return matrix3.multiplyMany(
             matrix3.translation(this.translation), 
-            matrix3.rotation(degreesToRadians(this.angleInDegrees)),
+            matrix3.rotation(this.angle),
             matrix3.scaling(this.scale),
             matrix3.translation(this.origin)
         );

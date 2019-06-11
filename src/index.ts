@@ -1,3 +1,5 @@
-import gameFactory from "./app/gameFactory";
+import Game from "./app/Game";
 
-gameFactory("canvas").run();
+Game.factory("canvas")
+    .initialize()
+    .run();
